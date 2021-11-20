@@ -22,7 +22,6 @@ assert EXTENSION_REGEX.search('InVEST_Setup.exe')
 assert not EXTENSION_REGEX.search('index.html')
 
 
-
 def count():
     monthly_counts = collections.defaultdict(int)
     last_time = time.time()
@@ -31,15 +30,25 @@ def count():
 
     summary_file = open('summary.txt', 'w')
     start_time = time.time()
-    for usage_file in glob.glob(
-            'logging/releases.naturalcapitalproject.org/_usage*'):
+
+    file_list = glob.glob(
+        'logging/releases.naturalcapitalproject.org/_usage*')
+
+    n_files = len(file_list)
+
+    for usage_file in file_list:
         n_files_touched += 1
         if time.time() - last_time > 5.0:
             elapsed = round(time.time() - start_time, 2)
+            n_files_touched_since_last_time = (
+                n_files_touched - n_files_touched_last_time)
+            files_per_second = round(
+                n_files_touched_last_time / elapsed, 2)
+
             print(
                 f'{n_files_touched} so far; {elapsed}s elapsed '
-                f'{(n_files_touched - n_files_touched_last_time) / elapsed} '
-                'files/s')
+                f'{files_per_second} files/second '
+                f'{n_files - n_files_touched} remaining')
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
