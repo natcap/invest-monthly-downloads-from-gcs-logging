@@ -50,7 +50,7 @@ def count():
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
-        table = pandas.read_csv(usage_file, sep=None, engine='c')
+        table = pandas.read_csv(usage_file, sep=',', engine='c')
 
         year_month_day = re.findall('[0-9]{4}_[0-9]+_[0-9]+', usage_file)[0]
         date = datetime.date(*[int(s) for s in year_month_day.split('_')])
