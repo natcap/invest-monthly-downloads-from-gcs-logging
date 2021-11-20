@@ -40,8 +40,6 @@ def count():
         n_files_touched += 1
         if time.time() - last_time > 5.0:
             elapsed = round(time.time() - start_time, 2)
-            n_files_touched_since_last_time = (
-                n_files_touched - n_files_touched_last_time)
             files_per_second = round(
                 n_files_touched_last_time / elapsed, 2)
 
@@ -52,7 +50,7 @@ def count():
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
-        table = pandas.read_csv(usage_file, sep=None, engine='python')
+        table = pandas.read_csv(usage_file, sep=None, engine='c')
 
         year_month_day = re.findall('[0-9]{4}_[0-9]+_[0-9]+', usage_file)[0]
         date = datetime.date(*[int(s) for s in year_month_day.split('_')])
