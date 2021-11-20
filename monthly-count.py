@@ -41,12 +41,18 @@ def count():
         if time.time() - last_time > 5.0:
             elapsed = round(time.time() - start_time, 2)
             files_per_second = round(
-                n_files_touched_last_time / elapsed, 2)
+                (n_files_touched_last_time - n_files_touched) / elapsed, 2)
+            remaining = n_files - n_files_touched
+            percent_remaining = round(
+                (remaining / n_files)*100, 2)
 
             print(
                 f'{n_files_touched} so far; {elapsed}s elapsed '
                 f'{files_per_second} files/second '
-                f'{n_files - n_files_touched} remaining')
+                f'{remaining} remaining '
+                f'{percent_remaining}% complete'
+            )
+
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
