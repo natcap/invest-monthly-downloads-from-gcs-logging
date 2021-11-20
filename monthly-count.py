@@ -40,6 +40,8 @@ def count():
         n_files_touched += 1
         if time.time() - last_time > 5.0:
             elapsed = round(time.time() - start_time, 2)
+            n_files_touched_since_last_time = (
+                n_files_touched - n_files_touched_last_time)
             files_per_second = round(
                 n_files_touched_last_time / elapsed, 2)
 
@@ -50,36 +52,29 @@ def count():
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
+        table = pandas.read_csv(usage_file, sep=None, engine='python')
+
         year_month_day = re.findall('[0-9]{4}_[0-9]+_[0-9]+', usage_file)[0]
         date = datetime.date(*[int(s) for s in year_month_day.split('_')])
 
-        with open(usage_file, 'r') as opened_usage_file:
-            header = True
-            for line in opened_usage_file:
-                if header:
-                    header = False
-                    continue
+        for index, row in table.iterrows():
+            downloaded_file = row['cs_object']
+            if not isinstance(downloaded_file, str):
+                # sometimes is nan
+                continue
 
-                # Strip leading, trailing double-quotes and whitespace, split
-                # by quoted comma
-                row_list = line.strip()[1:-1].split('","')
-                downloaded_file = row_list[-1]
-                if not isinstance(downloaded_file, str):
-                    # sometimes is nan
-                    continue
+            if not INVEST_REGEX.search(downloaded_file):
+                continue
 
-                if not INVEST_REGEX.search(downloaded_file):
-                    continue
+            if not EXTENSION_REGEX.search(downloaded_file):
+                continue
 
-                if not EXTENSION_REGEX.search(downloaded_file):
-                    continue
+            if not USERGUIDE_REGEX.search(downloaded_file):
+                continue
 
-                if not USERGUIDE_REGEX.search(downloaded_file):
-                    continue
-
-                monthly_counts[f'{date.year}-{date.month}'] += 1
-                summary_file.write(
-                    f'{date.year}-{date.month}-{date.day},{downloaded_file}\n')
+            monthly_counts[f'{date.year}-{date.month}'] += 1
+            summary_file.write(
+                f'{date.year}-{date.month}-{date.day},{downloaded_file}\n')
 
     summary_file.close()
     pprint.pprint(dict(monthly_counts))
