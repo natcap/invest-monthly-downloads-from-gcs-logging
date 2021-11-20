@@ -50,7 +50,7 @@ def count():
                 f'{n_files_touched} so far; {elapsed}s elapsed '
                 f'{files_per_second} files/second '
                 f'{remaining} remaining '
-                f'{percent_remaining}% complete'
+                f'{percent_remaining}% '
             )
 
             last_time = time.time()
