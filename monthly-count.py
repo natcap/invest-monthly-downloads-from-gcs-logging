@@ -7,6 +7,21 @@ import time
 
 import pandas
 
+# Hoping that using a bunch of regular expressions will help with basic string
+# processing speed.
+INVEST_REGEX = re.compile('InVEST')
+assert INVEST_REGEX.search('InVEST')
+assert not INVEST_REGEX.search('foo')
+
+USERGUIDE_REGEX = re.compile('userguide')
+assert USERGUIDE_REGEX.search('/userguide/index.html')
+assert not USERGUIDE_REGEX.search('InVEST_Setup.exe')
+
+EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)\$')
+assert EXTENSION_REGEX.search('InVEST_Setup.exe')
+assert not EXTENSION_REGEX.search('index.html')
+
+
 
 def count():
     monthly_counts = collections.defaultdict(int)
@@ -14,11 +29,13 @@ def count():
     n_files_touched = 0
 
     summary_file = open('summary.txt', 'w')
+    start_time = time.time()
     for usage_file in glob.glob(
             'logging/releases.naturalcapitalproject.org/_usage*'):
         n_files_touched += 1
         if time.time() - last_time > 5.0:
-            print(f'{n_files_touched} so far')
+            elapsed = round(time.time() - start_time, 2)
+            print(f'{n_files_touched} so far; {elapsed} elapsed')
             last_time = time.time()
 
         table = pandas.read_csv(usage_file, sep=None, engine='python')
@@ -32,12 +49,18 @@ def count():
                 # sometimes is nan
                 continue
 
-            if ('InVEST' in downloaded_file and
-                    downloaded_file.endswith(('.exe', '.dmg', '.zip')) and
-                    'userguide' not in downloaded_file):
-                monthly_counts[f'{date.year}-{date.month}'] += 1
-                summary_file.write(
-                    f'{date.year}-{date.month}-{date.day},{downloaded_file}\n')
+            if not INVEST_REGEX.search(downloaded_file):
+                continue
+
+            if not EXTENSION_REGEX.search(downloaded_file):
+                continue
+
+            if not USERGUIDE_REGEX.search(downloaded_file):
+                continue
+
+            monthly_counts[f'{date.year}-{date.month}'] += 1
+            summary_file.write(
+                f'{date.year}-{date.month}-{date.day},{downloaded_file}\n')
 
     summary_file.close()
     pprint.pprint(dict(monthly_counts))
