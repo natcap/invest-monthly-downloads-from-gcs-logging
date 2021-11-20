@@ -11,4 +11,4 @@ download:
 # Grab the header of a file, then grab the contents from all other files.
 concatenate-usage:
 	$(FIND) logging -name "_usage*" -print -quit | xargs head -n1 > usage-all.csv
-	$(FIND) logging -name "_usage*" | xargs grep /invest/ >> usage-all.csv
+	$(FIND) logging -name "_usage*" | xargs grep --no-filename /invest/ >> usage-all.csv
