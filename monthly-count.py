@@ -17,7 +17,7 @@ USERGUIDE_REGEX = re.compile('userguide')
 assert USERGUIDE_REGEX.search('/userguide/index.html')
 assert not USERGUIDE_REGEX.search('InVEST_Setup.exe')
 
-EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)\$')
+EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)$')
 assert EXTENSION_REGEX.search('InVEST_Setup.exe')
 assert not EXTENSION_REGEX.search('index.html')
 
@@ -27,6 +27,7 @@ def count():
     monthly_counts = collections.defaultdict(int)
     last_time = time.time()
     n_files_touched = 0
+    n_files_touched_last_time = 0
 
     summary_file = open('summary.txt', 'w')
     start_time = time.time()
@@ -35,8 +36,12 @@ def count():
         n_files_touched += 1
         if time.time() - last_time > 5.0:
             elapsed = round(time.time() - start_time, 2)
-            print(f'{n_files_touched} so far; {elapsed} elapsed')
+            print(
+                f'{n_files_touched} so far; {elapsed}s elapsed '
+                f'{(n_files_touched - n_files_touched_last_time) / elapsed} '
+                'files/s')
             last_time = time.time()
+            n_files_touched_last_time = n_files_touched
 
         table = pandas.read_csv(usage_file, sep=None, engine='python')
 
