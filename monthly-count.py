@@ -17,18 +17,17 @@ USERGUIDE_REGEX = re.compile('userguide')
 assert USERGUIDE_REGEX.search('/userguide/index.html')
 assert not USERGUIDE_REGEX.search('InVEST_Setup.exe')
 
-EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)$')
+EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)|(whl)|(tar.gz)$')
 assert EXTENSION_REGEX.search('InVEST_Setup.exe')
 assert not EXTENSION_REGEX.search('index.html')
 
 
-def count():
+def count_from_many_files():
     monthly_counts = collections.defaultdict(int)
     last_time = time.time()
     n_files_touched = 0
     n_files_touched_last_time = 0
 
-    summary_file = open('summary.txt', 'w')
     start_time = time.time()
 
     file_list = glob.glob(
@@ -56,33 +55,57 @@ def count():
             last_time = time.time()
             n_files_touched_last_time = n_files_touched
 
-        table = pandas.read_csv(usage_file, sep=',', engine='c')
+            monthly_counts = count_from_one_file(usage_file)
+            for month, count in monthly_counts.items():
+                monthly_counts[month] += count
 
-        year_month_day = re.findall('[0-9]{4}_[0-9]+_[0-9]+', usage_file)[0]
-        date = datetime.date(*[int(s) for s in year_month_day.split('_')])
+    write_dict_to_csv(monthly_counts)
 
-        for index, row in table.iterrows():
-            downloaded_file = row['cs_object']
-            if not isinstance(downloaded_file, str):
-                # sometimes is nan
-                continue
 
-            if not INVEST_REGEX.search(downloaded_file):
-                continue
+def count_from_one_file(filepath):
+    # See https://cloud.google.com/storage/docs/access-logs#format
+    # for the CSV format
+    table = pandas.read_csv(filepath, sep=',', engine='c')
 
-            if not EXTENSION_REGEX.search(downloaded_file):
-                continue
+    monthly_counts = collections.defaultdict(int)
 
-            if not USERGUIDE_REGEX.search(downloaded_file):
-                continue
+    for index, row in table.iterrows():
+        downloaded_file = row['cs_object']
+        if not isinstance(downloaded_file, str):
+            # sometimes is nan
+            # Based on the docs, this is probably when a listdir API call is
+            # made
+            continue
 
-            monthly_counts[f'{date.year}-{date.month}'] += 1
-            summary_file.write(
-                f'{date.year}-{date.month}-{date.day},{downloaded_file}\n')
+        if not INVEST_REGEX.search(downloaded_file):
+            continue
 
-    summary_file.close()
-    pprint.pprint(dict(monthly_counts))
+        if not EXTENSION_REGEX.search(downloaded_file):
+            continue
+
+        if USERGUIDE_REGEX.search(downloaded_file):
+            continue
+
+        # Date given in microseconds since the unix epoch
+        # frometimestamp() takes seconds as a parameter, so we need to convert
+        # microseconds to seconds.
+        date = datetime.datetime.fromtimestamp(
+            int(row['time_micros']) / 1000000)
+        monthly_counts[date.strftime('%Y-%m')] += 1
+
+    return monthly_counts
+
+
+def write_dict_to_csv(monthly_counts_dict):
+    monthly_counts = monthly_counts_dict
+    array_counts = {key: [value] for (key, value) in monthly_counts.items()}
+
+    pandas.DataFrame.from_dict(
+        array_counts,
+        orient='index',
+        columns=['download count']).to_csv('monthly-counts.csv')
 
 
 if __name__ == '__main__':
-    count()
+    #count_from_many_files()
+    write_dict_to_csv(count_from_one_file('usage-all-nofiles.csv'))
