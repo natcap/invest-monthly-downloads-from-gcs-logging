@@ -93,7 +93,7 @@ def write_dict_to_csv(monthly_counts_dict, target_filepath):
     dataframe = pandas.DataFrame.from_dict(
         monthly_counts,
         orient='index')
-    dataframe["total"] = dataframe["windows"] + dataframe["mac"]
+    dataframe["total"] = dataframe.sum(axis=1)
     dataframe = dataframe.sort_index()  # Fix a sorting issue in months
     dataframe.to_csv(target_filepath)
 
