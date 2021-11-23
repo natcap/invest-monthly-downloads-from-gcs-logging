@@ -37,7 +37,12 @@ def count_from_one_file(filepath):
     # See https://cloud.google.com/storage/docs/access-logs#format
     # for the CSV format
     start_time = time.time()
-    table = pandas.read_csv(filepath, sep=',', engine='c')
+    table = pandas.read_csv(
+        filepath,
+        sep=',',
+        engine='c',
+        on_bad_lines='warn'  # some lines in CSV are obviously malformed
+    )
     LOGGER.info(f'{filepath} read in {round(time.time() - start_time)}')
 
     monthly_counts = collections.defaultdict(
