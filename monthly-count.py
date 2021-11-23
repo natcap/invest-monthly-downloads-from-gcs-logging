@@ -2,8 +2,13 @@ import collections
 import datetime
 import re
 import sys
+import time
+import logging
 
 import pandas
+
+logging.basicConfig(level=logging.INFO)
+LOGGER = logging.getLogger(__name__)
 
 # Hoping that using a bunch of regular expressions will help with basic string
 # processing speed.
@@ -31,12 +36,22 @@ EXT_MAP = {
 def count_from_one_file(filepath):
     # See https://cloud.google.com/storage/docs/access-logs#format
     # for the CSV format
+    start_time = time.time()
     table = pandas.read_csv(filepath, sep=',', engine='c')
+    LOGGER.info(f'{filepath} read in {round(time.time() - start_time)}')
 
     monthly_counts = collections.defaultdict(
         lambda: collections.defaultdict(int))
 
-    for index, row in table.iterrows():
+    start_time = time.time()
+    for row_index, (_, row) in enumerate(table.itertuples()):
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= 5.0:
+            percent_complete = round(row_index / len(table.index), 2)
+            LOGGER.info(
+                f'Locating downloads; {percent_complete}% complete')
+            start_time = time.time()
+
         downloaded_file = row['cs_object']
         if not isinstance(downloaded_file, str):
             # sometimes is nan
@@ -68,6 +83,7 @@ def count_from_one_file(filepath):
         system = EXT_MAP[downloaded_file[-3:]]
         monthly_counts[month][system] += 1
 
+    LOGGER.info(f'Completed iteration over {filepath}')
     return monthly_counts
 
 
