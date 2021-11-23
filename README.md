@@ -1,15 +1,38 @@
 # Scripts for extracting logging from bucket state
 
 
-## Synchronize state
+## 1. Synchronize state
+
+This will download the raw logs, which at this point is several hundred
+thousand files. I've tried to limit the number of files that need to be
+downloaded, but it's still a lot.
+
+Grab a cup of coffee and don't do this at home (seriously, run it on the cloud
+console or something).
 
 ```
 $ make download
 ```
 
-## Concatenate some months of logging to a single file
+## 2. Concatenate logging to a single file
+
+This will take the several hundred thousand CSVs downloaded, extract all the
+InVEST-related things and copy them to a new CSV that we can parse.
+
+We do this because iterating over many files takes forever, particularly in
+python. Joining the needed results into a single file makes the tabulation
+much faster.
 
 ```
-# NOTE: use bash expansion for this
-$ ls logging/releases.naturalcapitalproject.org/_usage_2020_{03..08}_* | xargs cat > concatenated.txt
+$ make usage-all.csv
 ```
+
+## 3. Tabulate monthly counts
+
+This will write a single table with mac, windows and total download counts.
+
+```
+$ make monthly-counts.csv
+```
+
+This is probably what you want to send to the comms team.
