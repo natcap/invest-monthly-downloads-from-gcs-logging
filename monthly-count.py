@@ -52,7 +52,7 @@ def count_from_one_file(filepath):
                 f'Locating downloads; {percent_complete}% complete')
             start_time = time.time()
 
-        downloaded_file = row['cs_object']
+        downloaded_file = row.cs_object
         if not isinstance(downloaded_file, str):
             # sometimes is nan
             # Based on the docs, this is probably when a listdir API call is
@@ -71,14 +71,14 @@ def count_from_one_file(filepath):
         # Logging records all requests, regardless of their HTTP status.
         # Reject any records with a 400 status code and anything with a 500
         # status code is an internal server error and should be skipped too.
-        if 400 <= int(row['sc_status']) < 600:
+        if 400 <= int(row.sc_status) < 600:
             continue
 
         # Date given in microseconds since the unix epoch
         # frometimestamp() takes seconds as a parameter, so we need to convert
         # microseconds to seconds.
         date = datetime.datetime.fromtimestamp(
-            int(row['time_micros']) / 1000000)
+            int(row.time_micros) / 1000000)
         month = date.strftime('%Y-%m')
         system = EXT_MAP[downloaded_file[-3:]]
         monthly_counts[month][system] += 1
