@@ -19,7 +19,7 @@ download:
 # $< is the name of the first prerequisite.
 usage-%.csv:
 	$(FIND) logging -name "_usage*" -print -quit | xargs head -n1 > $@
-	$(GREP) --no-filename -r --exclude="_usage*" /$(subst usage-,,$(subst .csv,,$@))/ logging >> $@
+	$(GREP) --no-filename -r --exclude="_storage*" /$(subst usage-,,$(subst .csv,,$@))/ logging >> $@
 
 monthly-%.csv: usage-%.csv
 	$(PYTHON) monthly-count.py $<
