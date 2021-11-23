@@ -1,8 +1,7 @@
 import collections
 import datetime
-import glob
 import re
-import time
+import sys
 
 import pandas
 
@@ -27,46 +26,6 @@ EXT_MAP = {
     'zip': 'mac',  # We distributed several InVEST mac builds as .zip
     'exe': 'windows',
 }
-
-
-def count_from_many_files():
-    monthly_counts = collections.defaultdict(int)
-    last_time = time.time()
-    n_files_touched = 0
-    n_files_touched_last_time = 0
-
-    start_time = time.time()
-
-    file_list = glob.glob(
-        'logging/releases.naturalcapitalproject.org/_usage*')
-
-    n_files = len(file_list)
-
-    for usage_file in file_list:
-        n_files_touched += 1
-        if time.time() - last_time > 5.0:
-            elapsed = round(time.time() - start_time, 2)
-            files_per_second = round(
-                (n_files_touched_last_time - n_files_touched) / elapsed, 2)
-            remaining = n_files - n_files_touched
-            percent_remaining = round(
-                (remaining / n_files)*100, 2)
-
-            print(
-                f'{n_files_touched} so far; {elapsed}s elapsed '
-                f'{files_per_second} files/second '
-                f'{remaining} remaining '
-                f'{percent_remaining}% '
-            )
-
-            last_time = time.time()
-            n_files_touched_last_time = n_files_touched
-
-            monthly_counts = count_from_one_file(usage_file)
-            for month, count in monthly_counts.items():
-                monthly_counts[month] += count
-
-    write_dict_to_csv(monthly_counts)
 
 
 def count_from_one_file(filepath):
@@ -124,5 +83,4 @@ def write_dict_to_csv(monthly_counts_dict):
 
 
 if __name__ == '__main__':
-    #count_from_many_files()
-    write_dict_to_csv(count_from_one_file('usage-all.csv'))
+    write_dict_to_csv(count_from_one_file(sys.argv[1]))
