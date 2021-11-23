@@ -44,7 +44,7 @@ def count_from_one_file(filepath):
         lambda: collections.defaultdict(int))
 
     start_time = time.time()
-    for row_index, (_, row) in enumerate(table.itertuples()):
+    for row_index, row in enumerate(table.itertuples()):
         elapsed_time = time.time() - start_time
         if elapsed_time >= 5.0:
             percent_complete = round(row_index / len(table.index), 2)
