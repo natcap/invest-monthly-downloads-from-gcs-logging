@@ -17,6 +17,9 @@ download:
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
 # $@ is the file name of the target of the rule
 # $< is the name of the first prerequisite.
+#
+# .PRECIOUS prevents intermediate files from being deleted
+.PRECIOUS: usage-%.csv
 usage-%.csv:
 	$(FIND) logging -name "_usage*" -print -quit | xargs head -n1 > $@
 	$(GREP) --no-filename -r --exclude="_storage*" /$(subst usage-,,$(subst .csv,,$@))/ logging >> $@
