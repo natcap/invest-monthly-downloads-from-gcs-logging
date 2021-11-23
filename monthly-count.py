@@ -61,13 +61,21 @@ def count_from_many_files():
 
     write_dict_to_csv(monthly_counts)
 
+EXT_MAP = {
+    'whl': 'python',
+    '.gz': 'python',
+    'dmg': 'mac',
+    'zip': 'mac',  # We distributed several InVEST mac builds as .zip
+    'exe': 'windows',
+}
 
 def count_from_one_file(filepath):
     # See https://cloud.google.com/storage/docs/access-logs#format
     # for the CSV format
     table = pandas.read_csv(filepath, sep=',', engine='c')
 
-    monthly_counts = collections.defaultdict(int)
+    monthly_counts = collections.defaultdict(
+        lambda: collections.defaultdict(int))
 
     for index, row in table.iterrows():
         downloaded_file = row['cs_object']
@@ -86,24 +94,33 @@ def count_from_one_file(filepath):
         if USERGUIDE_REGEX.search(downloaded_file):
             continue
 
+        # Logging records all requests, regardless of their HTTP status.
+        # Reject any records with a 400 status code and anything with a 500
+        # status code is an internal server error and should be skipped too.
+        if 400 <= int(row['sc_status']) < 600:
+            continue
+
         # Date given in microseconds since the unix epoch
         # frometimestamp() takes seconds as a parameter, so we need to convert
         # microseconds to seconds.
         date = datetime.datetime.fromtimestamp(
             int(row['time_micros']) / 1000000)
-        monthly_counts[date.strftime('%Y-%m')] += 1
+        month = date.strftime('%Y-%m')
+        system = EXT_MAP[downloaded_file[-3:]]
+        monthly_counts[month][system] += 1
 
     return monthly_counts
 
 
 def write_dict_to_csv(monthly_counts_dict):
     monthly_counts = monthly_counts_dict
-    array_counts = {key: [value] for (key, value) in monthly_counts.items()}
 
-    pandas.DataFrame.from_dict(
-        array_counts,
-        orient='index',
-        columns=['download count']).to_csv('monthly-counts.csv')
+    dataframe = pandas.DataFrame.from_dict(
+        monthly_counts,
+        orient='index')
+    dataframe["total"] = dataframe["windows"] + dataframe["mac"]
+    dataframe = dataframe.sort_index()  # Fix a sorting issue in months
+    dataframe.to_csv('monthly-counts.csv')
 
 
 if __name__ == '__main__':
