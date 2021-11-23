@@ -1,39 +1,38 @@
-# Scripts for extracting logging from bucket state
+# Aggregate our usage logging by month
 
+## Setup
 
-## 1. Synchronize state
+Because our raw usage logs take a long time to execute, run this on a system
+that won't be interrupted. A google cloud VM is probably best, since we won't
+be charged for bucket egress within the google network.
 
-This will download the raw logs, which at this point is several hundred
-thousand files. I've tried to limit the number of files that need to be
-downloaded, but it's still a lot.
+The system will also need these packages installed:
 
-Grab a cup of coffee and don't do this at home (seriously, run it on a google
-cloud VM -- not the cloud console -- and be sure to SSH in properly since it'll
-be a lot faster that way than through the web browser).
+* `python3`
+* `python3-pandas`
+* The Google Cloud SDK (`gsutil`)
+* GNU `make`, `grep`, `find`, `mkdir` and `xargs`
 
-```
-$ make download
-```
+On a debian VM in google cloud, this command will suffice:
 
-## 2. Concatenate logging to a single file
-
-This will take the several hundred thousand CSVs downloaded, extract all the
-InVEST-related things and copy them to a new CSV that we can parse.
-
-We do this because iterating over many files takes forever, particularly in
-python. Joining the needed results into a single file makes the tabulation
-much faster.
-
-```
-$ make usage-all.csv
+```bash
+$ sudo apt update && sudo apt install python3 make python3-pip
+$ sudo python3 -m pip install --upgrade "pandas>=1.3.0"
 ```
 
-## 3. Tabulate monthly counts
+## Command Execution
 
-This will write a single table with mac, windows and total download counts.
-
-```
-$ make monthly-counts.csv
+```bash
+$ make all
 ```
 
-This is probably what you want to send to the comms team.
+This make command, `make all` will execute the following:
+
+1. `gsutil rsync` to fetch the raw usage logs
+2. We aggregate all of these CSV files together into large logfiles for easier
+   parsing
+3. We run a python script to summarize counts by month.
+
+Note that steps 2 and 3 are automatically done for `invest` and
+`invest-workspace`. As an output, you'll see `monthly-invest.csv` and
+`monthly-invest-workbench.csv` in the CWD.
