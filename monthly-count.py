@@ -125,4 +125,4 @@ def write_dict_to_csv(monthly_counts_dict):
 
 if __name__ == '__main__':
     #count_from_many_files()
-    write_dict_to_csv(count_from_one_file('usage-all-nofiles.csv'))
+    write_dict_to_csv(count_from_one_file('usage-all.csv'))
