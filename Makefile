@@ -20,9 +20,6 @@ usage-%.csv:
 	$(FIND) logging -name "_usage*" -print -quit | xargs head -n1 > $@
 	$(FIND) logging -name "_usage*" | xargs grep --no-filename /$(subst usage-,,$@)/ >> $@
 
-monthly-counts.csv:
-	$(PYTHON) monthly-count.py usage-all.csv
-
 monthly-%.csv: usage-%.csv
 	$(PYTHON) monthly-count.py $<
 

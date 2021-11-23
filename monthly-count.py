@@ -71,7 +71,7 @@ def count_from_one_file(filepath):
     return monthly_counts
 
 
-def write_dict_to_csv(monthly_counts_dict):
+def write_dict_to_csv(monthly_counts_dict, target_filepath):
     monthly_counts = monthly_counts_dict
 
     dataframe = pandas.DataFrame.from_dict(
@@ -79,8 +79,12 @@ def write_dict_to_csv(monthly_counts_dict):
         orient='index')
     dataframe["total"] = dataframe["windows"] + dataframe["mac"]
     dataframe = dataframe.sort_index()  # Fix a sorting issue in months
-    dataframe.to_csv('monthly-counts.csv')
+    dataframe.to_csv(target_filepath)
 
 
 if __name__ == '__main__':
-    write_dict_to_csv(count_from_one_file(sys.argv[1]))
+    source_csv_path = sys.argv[1]  # expected: usage-invest-workbench.csv
+    dest_csv_path = source_csv_path.replace('usage-', 'monthly-')
+    write_dict_to_csv(
+        count_from_one_file(source_csv_path),
+        dest_csv_path)
