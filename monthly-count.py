@@ -6,6 +6,10 @@ import time
 import logging
 
 import pandas
+from packaging import version
+
+if version.parse(pandas.__version__) < version.parse('1.3.0'):
+    raise AssertionError('Pandas >= 1.3.0 required')
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
