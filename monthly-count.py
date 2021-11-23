@@ -1,7 +1,6 @@
 import collections
 import datetime
 import glob
-import pprint
 import re
 import time
 
@@ -20,6 +19,14 @@ assert not USERGUIDE_REGEX.search('InVEST_Setup.exe')
 EXTENSION_REGEX = re.compile('(exe)|(dmg)|(zip)|(whl)|(tar.gz)$')
 assert EXTENSION_REGEX.search('InVEST_Setup.exe')
 assert not EXTENSION_REGEX.search('index.html')
+
+EXT_MAP = {
+    'whl': 'python',
+    '.gz': 'python',
+    'dmg': 'mac',
+    'zip': 'mac',  # We distributed several InVEST mac builds as .zip
+    'exe': 'windows',
+}
 
 
 def count_from_many_files():
@@ -61,13 +68,6 @@ def count_from_many_files():
 
     write_dict_to_csv(monthly_counts)
 
-EXT_MAP = {
-    'whl': 'python',
-    '.gz': 'python',
-    'dmg': 'mac',
-    'zip': 'mac',  # We distributed several InVEST mac builds as .zip
-    'exe': 'windows',
-}
 
 def count_from_one_file(filepath):
     # See https://cloud.google.com/storage/docs/access-logs#format
