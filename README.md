@@ -7,8 +7,9 @@ This will download the raw logs, which at this point is several hundred
 thousand files. I've tried to limit the number of files that need to be
 downloaded, but it's still a lot.
 
-Grab a cup of coffee and don't do this at home (seriously, run it on the cloud
-console or something).
+Grab a cup of coffee and don't do this at home (seriously, run it on a google
+cloud VM -- not the cloud console -- and be sure to SSH in properly since it'll
+be a lot faster that way than through the web browser).
 
 ```
 $ make download
