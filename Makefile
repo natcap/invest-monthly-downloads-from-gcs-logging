@@ -3,6 +3,7 @@
 # Must be GNU find.
 # May need to set this on Windows.
 FIND := find
+GREP := grep
 PYTHON := python3
 
 # -j enables gzip compression
@@ -18,7 +19,7 @@ download:
 # $< is the name of the first prerequisite.
 usage-%.csv:
 	$(FIND) logging -name "_usage*" -print -quit | xargs head -n1 > $@
-	$(FIND) logging -name "_usage*" | xargs grep --no-filename /$(subst usage-,,$(subst .csv,,$@))/ >> $@
+	$(GREP) --no-filename -r --exclude="_usage*" /$(subst usage-,,$(subst .csv,,$@))/ logging >> $@
 
 monthly-%.csv: usage-%.csv
 	$(PYTHON) monthly-count.py $<
