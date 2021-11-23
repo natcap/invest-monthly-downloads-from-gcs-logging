@@ -7,7 +7,7 @@ PYTHON := python3
 
 download:
 	-mkdir logging
-	gsutil -m rsync -r -j -x ".*_storage.*" gs://logging-natcap logging
+	gsutil -m rsync -r -j "" -x ".*_storage.*" gs://logging-natcap logging
 
 # Grab the header of a file, then grab the contents from all other files.
 usage-all.csv:
