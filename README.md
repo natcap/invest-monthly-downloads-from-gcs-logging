@@ -17,7 +17,7 @@ On a debian VM in google cloud, this command will suffice:
 
 ```bash
 $ sudo apt update && sudo apt install python3 make python3-pip
-$ sudo python3 -m pip install --upgrade "pandas>=1.3.0"
+$ sudo python3 -m pip install --prefer-binary --upgrade "pandas>=1.3.0"
 ```
 
 ## Command Execution
