@@ -137,14 +137,14 @@ def count_from_one_file(source_filepath, target_filtered_csv_path):
         return monthly_counts
 
     # also dump the table to sqlite
-    sqlite_path = os.path.basename(target_filtered_csv_path)
-    conn = sqlite3.connect(f'{sqlite_path}.sqlite')
+    sqlite_path = os.path.splitext(target_filtered_csv_path)[0] + '.sqlite'
+    conn = sqlite3.connect(sqlite_path)
     invest_downloads_df.to_sql(
         'invest', conn, if_exists='replace', index=False)
     conn.close()
 
     identify_uniqueish_downloads(
-        sqlite_path, 'aggregated-monthly-counts.csv')
+        sqlite_path, 'aggregated-invest-monthly-counts.csv')
 
     return monthly_counts
 
