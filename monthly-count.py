@@ -173,7 +173,7 @@ def identify_uniqueish_downloads(sqlite_path, target_csv):
             """\
             select month, count(*) from (
                 select "ISO-8601-datetime",
-                        substr("ISO-8601-datetime", 0,
+                        substr("ISO-8601-datetime", 0, 8) as month,
                         substr("ISO-8601-datetime", 0, 11) as day,
                         substr("ISO-8601-datetime", 12, 2) as hour,
                         c_ip,
